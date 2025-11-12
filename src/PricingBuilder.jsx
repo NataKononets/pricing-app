@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useMemo } from "react";
 
 export default function PricingBuilder() {
 
@@ -12,6 +12,9 @@ export default function PricingBuilder() {
     });
     const [plans, setPlans] = useState([]);
     const [errors, setErrors] = useState({});
+    const lastSelectedPlan = useRef(null);
+    const [selectedId, setSelectedId] = useState(null);
+    const selectedPlan = useMemo(() => plans.find((p) => p.id === selectedId) || null, [plans, setSelectedId]);
 
 
     function handleChange(e) {
@@ -67,6 +70,15 @@ export default function PricingBuilder() {
     function addPlan(preset) {
         const plan = { id: crypto.randomUUID(), ...preset };
         setPlans(prev => [plan, ...prev]);
+    }
+    function handleSelectPlan(plan) {
+        lastSelectedPlan.current = plan;
+        setSelectedId(plan.id);
+    }
+    function isDiff(field, plan0) {
+        if (!selectedPlan) return false;
+        if (plan.id === selectedPlan.id) return false;
+        return plan[field] !== selectedPlan[field]
     }
 
     return (
@@ -225,6 +237,20 @@ export default function PricingBuilder() {
                 </div>
             </form>
 
+            {selectedPlan && (
+                <div className="alert alert-info d-flex justify-content-between align-items-center small mb-4">
+                    <div>
+                        Порівняння з вибраним планом:
+                        <strong>
+                            {selectedPlan.title}
+                        </strong>.
+                        Червоним підсвічено відмінності. Обрана картка — з синьою рамкою.
+                    </div>
+                    <button className="btn btn-sm btn-outline-secondary" onClick={() => setSelectedId(null)}>
+                        Clear compare
+                    </button>
+                </div>
+            )}
             <div className="row row-cols-1 row-cols-md-3 g-4">
                 {plans.length === 0 && (
                     <div className="col">
@@ -238,7 +264,12 @@ export default function PricingBuilder() {
                     <div className="col" key={p.id}>
                         <div
                             className={`card h-100 rounded-4 ${p.featured ? "shadow-lg border-primary" : "shadow-sm"
-                                }`}
+                                } ${selectedId === p.id ? "border-3 border-primary" : ""} ${selectedPlan &&
+                                    p.id !== selectedId &&
+                                    (isDiff("price", p) || isDiff("users", p) || isDiff("storage", p) || isDiff("helpCenter", p))
+                                    ? "border-2 border-warning"
+                                    : ""
+                                }  }`}
                         >
                             <div
                                 className={`card-header py-3 d-flex align-items-center justify-content-between ${p.featured ? "text-bg-primary border-primary" : "bg-white"
@@ -258,22 +289,26 @@ export default function PricingBuilder() {
                             </div>
 
                             <div className="card-body d-flex flex-column">
-                                <h1 className="card-title display-6 fw-bold mb-3">
+                                <h1 className={`card-title display-6 fw-bold mb-3 ${isDiff("price", p) ? "text-danger" : ""}`}>
                                     ${p.price}
                                     <small className="text-body-secondary fw-light">/mo</small>
                                 </h1>
                                 <ul className="list-unstyled text-muted mb-4 small">
-                                    <li className="mb-1">{p.users} users included</li>
-                                    <li className="mb-1">{p.storage} GB of storage</li>
-                                    <li className="mb-1">
+                                    <li className={`mb - 1 ${isDiff("users", p) ? "text-danger fw-semibold" : ""}`}>
+                                        {p.users} users included
+                                    </li>
+                                    <li className={`mb - 1 ${isDiff("storage", p) ? "text-danger fw-semibold" : ""}`}>
+                                        {p.storage} GB of storage
+                                    </li>
+                                    <li className={`mb - 1 ${isDiff("helpCenter", p) ? "text-danger fw-semibold" : ""}`}>
                                         {p.helpCenter ? "Help center access" : "No help center"}
                                     </li>
                                 </ul>
                                 <div className="mt-auto d-grid gap-2">
                                     <button
-                                        className={`btn btn-lg ${p.featured ? "btn-light" : "btn-primary"
-                                            }`}
+                                        className={`btn btn-lg ${p.featured ? "btn-light" : "btn-primary"}`}
                                         type="button"
+                                        onClick={() => handleSelectPlan(p)}
                                     >
                                         Get started
                                     </button>
@@ -288,8 +323,9 @@ export default function PricingBuilder() {
                             </div>
                         </div>
                     </div>
-                ))}
-            </div>
+                ))
+                }
+            </div >
             <hr className="my-5" />
             <div className="row text-muted small g-4">
                 <div className="col-6 col-md-3">
@@ -319,6 +355,6 @@ export default function PricingBuilder() {
                     </ul>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
