@@ -14,7 +14,7 @@ export default function PricingBuilder() {
     const [errors, setErrors] = useState({});
     const lastSelectedPlan = useRef(null);
     const [selectedId, setSelectedId] = useState(null);
-    const selectedPlan = useMemo(() => plans.find((p) => p.id === selectedId) || null, [plans, setSelectedId]);
+    const selectedPlan = useMemo(() => plans.find((p) => p.id === selectedId) || null, [plans, selectedId]);
 
 
     function handleChange(e) {
@@ -66,16 +66,18 @@ export default function PricingBuilder() {
 
     function removePlan(id) {
         setPlans((prev) => prev.filter((p) => p.id !== id));
+        if (setSelectedId === id) setSelectedId
     }
     function addPlan(preset) {
         const plan = { id: crypto.randomUUID(), ...preset };
         setPlans(prev => [plan, ...prev]);
+        setErrors({});
     }
     function handleSelectPlan(plan) {
         lastSelectedPlan.current = plan;
         setSelectedId(plan.id);
     }
-    function isDiff(field, plan0) {
+    function isDiff(field, plan) {
         if (!selectedPlan) return false;
         if (plan.id === selectedPlan.id) return false;
         return plan[field] !== selectedPlan[field]
@@ -294,13 +296,13 @@ export default function PricingBuilder() {
                                     <small className="text-body-secondary fw-light">/mo</small>
                                 </h1>
                                 <ul className="list-unstyled text-muted mb-4 small">
-                                    <li className={`mb - 1 ${isDiff("users", p) ? "text-danger fw-semibold" : ""}`}>
+                                    <li className={`mb-1 ${isDiff("users", p) ? "text-danger fw-semibold" : ""}`}>
                                         {p.users} users included
                                     </li>
-                                    <li className={`mb - 1 ${isDiff("storage", p) ? "text-danger fw-semibold" : ""}`}>
+                                    <li className={`mb-1 ${isDiff("storage", p) ? "text-danger fw-semibold" : ""}`}>
                                         {p.storage} GB of storage
                                     </li>
-                                    <li className={`mb - 1 ${isDiff("helpCenter", p) ? "text-danger fw-semibold" : ""}`}>
+                                    <li className={`mb-1 ${isDiff("helpCenter", p) ? "text-danger fw-semibold" : ""}`}>
                                         {p.helpCenter ? "Help center access" : "No help center"}
                                     </li>
                                 </ul>
