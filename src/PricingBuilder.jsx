@@ -125,7 +125,7 @@ export default function PricingBuilder() {
                                 min="0"
                                 step="0.01"
                                 className={`form-control ${errors.price ? "is-invalid" : ""}`}
-                                placeholder="0"
+                                placeholder="вкажіть ціну"
                             />
                             <span className="input-group-text">/mo</span>
                             {errors.price && (
@@ -144,7 +144,7 @@ export default function PricingBuilder() {
                             min="1"
                             step="1"
                             className={`form-control ${errors.users ? "is-invalid" : ""}`}
-                            placeholder="10"
+                            placeholder="вкажіть к-сть юзерів"
                         />
                         {errors.users && (
                             <div className="invalid-feedback d-block">{errors.users}</div>
@@ -161,7 +161,7 @@ export default function PricingBuilder() {
                             min="1"
                             step="1"
                             className={`form-control ${errors.storage ? "is-invalid" : ""}`}
-                            placeholder="5"
+                            placeholder="вкажіть обсяг,  GB"
                         />
                         {errors.storage && (
                             <div className="invalid-feedback d-block">{errors.storage}</div>
